@@ -21,10 +21,12 @@ def local_train(index, opt, global_model, optimizer, save=False):
     local_model = ActorCritic(num_states, num_actions)
     if opt.use_gpu:
         local_model.cuda()
+
     local_model.train()
     state = torch.from_numpy(env.reset())
     if opt.use_gpu:
         state = state.cuda()
+
     done = True
     curr_step = 0
     curr_episode = 0
@@ -34,6 +36,7 @@ def local_train(index, opt, global_model, optimizer, save=False):
                 torch.save(global_model.state_dict(),
                            "{}/a3c_super_mario_bros_{}_{}".format(opt.saved_path, opt.world, opt.stage))
             print("Process {}. Episode {}".format(index, curr_episode))
+
         curr_episode += 1
         local_model.load_state_dict(global_model.state_dict())
         if done:
@@ -91,6 +94,7 @@ def local_train(index, opt, global_model, optimizer, save=False):
         gae = torch.zeros((1, 1), dtype=torch.float)
         if opt.use_gpu:
             gae = gae.cuda()
+
         actor_loss = 0
         critic_loss = 0
         entropy_loss = 0
@@ -101,6 +105,7 @@ def local_train(index, opt, global_model, optimizer, save=False):
             gae = gae + reward + opt.gamma * next_value.detach() - value.detach()
             next_value = value
             actor_loss = actor_loss + log_policy * gae
+
             R = R * opt.gamma + reward
             critic_loss = critic_loss + (R - value) ** 2 / 2
             entropy_loss = entropy_loss + entropy

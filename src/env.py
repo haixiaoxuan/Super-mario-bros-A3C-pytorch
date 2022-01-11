@@ -50,8 +50,10 @@ class CustomReward(Wrapper):
         if self.monitor:
             self.monitor.record(state)
         state = process_frame(state)
+
         reward += (info["score"] - self.curr_score) / 40.
         self.curr_score = info["score"]
+
         if done:
             if info["flag_get"]:
                 reward += 50
@@ -92,16 +94,19 @@ class CustomSkipFrame(Wrapper):
 
 def create_train_env(world, stage, action_type, output_path=None):
     env = gym_super_mario_bros.make("SuperMarioBros-{}-{}-v0".format(world, stage))
+
     if output_path:
         monitor = Monitor(256, 240, output_path)
     else:
         monitor = None
+
     if action_type == "right":
         actions = RIGHT_ONLY
     elif action_type == "simple":
         actions = SIMPLE_MOVEMENT
     else:
         actions = COMPLEX_MOVEMENT
+
     env = JoypadSpace(env, actions)
     env = CustomReward(env, monitor)
     env = CustomSkipFrame(env)
